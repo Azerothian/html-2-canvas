@@ -1,10 +1,10 @@
+
+import "babel-polyfill";
 import * as parse5 from "parse5";
 import parseCss from "css-parse";
 import CSSselect from "css-select";
 
-// import merge from "./utils/merge";
 import parsePx from "./utils/parse-px";
-// import lineRenderer from "./renderers/line";
 
 import ElementRenderer from "./renderers/element";
 
@@ -62,35 +62,6 @@ function applyStyleTag(node) {
     }
   }
 }
-// function extractFontShorthand(s, style) {
-//   const e = s.split(" ");
-//   if (!style.font) {
-//     style.font = {};
-//   }
-//   if (e.length === 2) {
-//     style.font.size = (e[0].indexOf("px") > -1) ? parsePx(e[0]) : e[0];
-//     style.font.family = e[1];
-//   }
-//   // const style = {};
-//   // if(e[0]) {
-//   //   style.font.style = e[0];
-//   // }
-//   // if(e[1]) {
-//   //   style.font.variant = e[1];
-//   // }
-//   // if(e[2]) {
-//   //   style.font.weight = e[2];
-//   // }
-//   // if (e[3]) {
-//   //   if (e[3].indexOf("/") > -1) {
-//   //     const c = e[3].split("/");
-//   //     style.font.size = c[0];
-//   //     style.line.height = c[1];
-//   //   }
-//   // }
-
-// }
-
 
 function extractShorthandSpacing(s) {
   const e = s.split(" ").map((r) => parsePx(r));
@@ -133,143 +104,10 @@ function extractShorthandSpacing(s) {
     right: 0,
   };
 }
-
-/* 
--> margin-top -> border -> padding-top -> contents 
--> padding-bottom -> border -> margin-bottom
-*/
-
-/* text, span treated the same */
-/* context
-.pos = {
-  x,
-  y
+let fetch;
+if (typeof window === "object") {
+  fetch = window.fetch;
 }
-.style
-*/
-
-// async function contentRenderer() {
-
-
-// }
-
-
-
-
-// const inheritable = [
-//   "font",
-//   "text",
-//   "color",
-// ];
-
-// async function processElement(element, parentCtx, cx2d, renderer) {
-
-//   // console.log("processElement", {renderer});
-//   console.log("parentpos", parentCtx.pos, element.name || element.type);
-//   let ctx = {
-//     pos: {
-//       x: parentCtx.pos.x || 0,
-//       y: parentCtx.pos.y || 0,
-//     },
-//     style: {
-//       padding: {top: 0, bottom: 0, left: 0, right: 0},
-//       margin: {top: 0, bottom: 0, left: 0, right: 0},
-//     },
-//   };
-
-
-
-
-
-
-
-//   if (parentCtx.style) {
-//     // ctx.style = merge({}, parentCtx.style);
-
-//     ctx.style = Object.keys(parentCtx.style).reduce((s, key) => {
-//       for (let x in inheritable) {
-//         // console.log("inherits", inheritable[x], key);
-//         if (key.indexOf(inheritable[x]) > -1) {
-//           if (!s[key]) {
-//             s[key] = parentCtx.style[key];
-//           } else if (typeof s[key] === "object" && typeof parentCtx.style[key] === "object") {
-//             s[key] = merge({}, s[key], parentCtx.style[key]);
-//           } else {
-//             s[key] = parentCtx.style[key];
-//           }
-//         }
-//       }
-//       return s;
-//     }, ctx.style);
-//   }
-//   if (element.format) {
-//     ctx.style = merge({}, ctx.style, element.format);
-//   }
-
-
-//   let box = {
-//     top: parentCtx.pos.y + ctx.style.margin.top + ctx.style.padding.top,
-//     left: parentCtx.pos.x + ctx.style.margin.left + ctx.style.padding.left,
-//     height: 0,
-//     width: 0
-//   };
-
-
-
-//   let renders = [];
-
-
-
-//   console.log("ctx.pos", ctx.pos);
-//   ctx.pos.x += ctx.style.margin.top;
-//   ctx.pos.y += ctx.style.margin.left;
-//   //todo: border spacing
-//   ctx.pos.x += ctx.style.padding.top;
-//   ctx.pos.y += ctx.style.padding.left;
-//   if (ctx.style.width) {
-//     ctx.outerWidth = ctx.style.width + ctx.style.margin.left + ctx.style.margin.right;
-//     ctx.width = ctx.style.width;
-//   } else {
-//     ctx.outerWidth = parentCtx.innerWidth;
-//     ctx.width = ctx.outerWidth - ctx.style.margin.left - ctx.style.margin.right;
-//   }
-//   ctx.innerWidth = ctx.width - ctx.style.padding.left - ctx.style.padding.right;
-  
-//   // console.log(ctx);
-//   //TODO: element height & background rendering
-//   if (element.children) {
-
-//     let textElements = [];
-//     for (let x in element.children) {
-//       const child = element.children[x];
-//       if (child.name === "br" || child.name === "span" || child.type === "text" || child.name === "img") {
-//         // console.log("pushing line elements");
-//         textElements.push(child);
-//       } else {
-//         if (textElements.length > 0) {
-//           // console.log("calling line renderer", child.name || child.type, renderer);
-//           ctx = await lineRenderer(textElements, ctx, cx2d, renderer);
-//           textElements = [];
-//         }
-//         ctx = await processElement(child, ctx, cx2d, renderer);
-//       }
-//     }
-
-//     if (textElements.length > 0) {
-//       ctx = await lineRenderer(textElements, ctx, cx2d, renderer);
-//       // textElements = [];
-//     }
-//   }
-
-
-//   parentCtx.pos.x = 0;
-//   parentCtx.pos.y = ctx.pos.y + ctx.style.padding.bottom + ctx.style.margin.bottom;
-//   //TODO modify pos
-  
-//   console.log("return", parentCtx.pos, element.name || element.type);
-//   return parentCtx;
-// }
-
 
 export default class Html2Canvas {
   constructor(options = {}) {
@@ -290,6 +128,12 @@ export default class Html2Canvas {
     }
     return new Image();
   }
+  fetch() {
+    if (this.options.fetch) {
+      return this.options.fetch.apply(undefined, arguments);
+    }
+    return fetch.apply(undefined, arguments);
+  }
   async render(html, canvas) {
     let {stylesheet} = (this.options.stylesheet) ? parseCss(this.options.stylesheet) : {};
     const dom = parse5.parse(html, {
@@ -308,25 +152,12 @@ export default class Html2Canvas {
           topInner: 0,
           leftInner: 0,
           widthInner: canvas.width,
-          height: 0//canvas.height,
+          height: 0
         },
       },
       renderer: this,
     });
     await rootElement.process();
     await rootElement.render(cx2d);
-
-    // const ctx = {
-    //   pos: {
-    //     x: 0,
-    //     y: 0,
-    //   },
-    //   innerWidth: canvas.width,
-    // };
-    
-
-
-    // console.log("starting", ctx);
-    // await processElement(dom, ctx, cx2d, this);
   }
 }

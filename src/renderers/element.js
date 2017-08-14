@@ -39,10 +39,10 @@ export default class ElementRenderer {
     }
     this.format = merge(this.format, element.format);
   }
-  async process(yIndex = 0) {
+  async process(yPos = 0) {
     const width = (this.format.width) ? this.format.width :
       this.parent.bounding.widthInner - this.format.margin.left - this.format.margin.right;
-    const top = yIndex + this.format.margin.top;
+    const top = yPos + this.format.margin.top;
     const left = this.parent.bounding.leftInner + this.format.margin.left;
     this.bounding = {
       top,
@@ -65,10 +65,7 @@ export default class ElementRenderer {
               elements: textElements,
               parent: this,
               renderer: this.renderer});
-            // console.log("lr1 before", yIndex);
-            yIndex += await lr1.process();
-            // console.log("lr1 after", yIndex);
-            // console.log("first line renderer", yIndex);
+            yPos += await lr1.process(yPos);
             if (lr1.bounding.height > 0) {
               this.children.push(lr1);
             }
@@ -79,11 +76,7 @@ export default class ElementRenderer {
             parent: this,
             renderer: this.renderer,
           });
-
-          // console.log("el before", yIndex);
-          yIndex = await el.process(yIndex);
-          // console.log("el after", yIndex);
-          // console.log("element renderer", {yIndex, el});
+          yPos = await el.process(yPos);
           if (el.bounding.height > 0) {
             this.children.push(el);
           }
@@ -94,38 +87,27 @@ export default class ElementRenderer {
           elements: textElements,
           parent: this,
           renderer: this.renderer});
-        // console.log("lr2 before", yIndex);
-        yIndex += await lr2.process();
-        // console.log("lr2 after", yIndex);
+        yPos += await lr2.process(yPos);
         if (lr2.bounding.height > 0) {
           this.children.push(lr2);
         }
       }
     }
-    // console.log("this.format.padding.bottom", this.format.padding.bottom);
-    // console.log("this.format.margin.bottom", this.format.margin.bottom);
-    this.bounding.height += (yIndex + this.format.padding.bottom);
+    this.bounding.height += (yPos + this.format.padding.bottom);
     const result = this.bounding.height + this.format.margin.bottom;
     return result;
   }
   async render(cx2d) {
-    // console.log("start renderer", this.bounding);
     cx2d.save();
-
     if (this.format.background) {
       if (this.format.background.color) {
-        console.log("background", this.bounding);
         cx2d.beginPath();
         cx2d.rect(this.bounding.left, this.bounding.top, this.bounding.width, this.bounding.height - this.bounding.top);
         cx2d.fillStyle = this.format.background.color;
         cx2d.fill();
       }
     }
-
-
     cx2d.restore();
-
-
     for (let x in this.children) {
       const element = this.children[x];
       await element.render(cx2d);

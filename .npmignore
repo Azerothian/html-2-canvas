@@ -1,0 +1,13 @@
+src/
+.vscode/
+.eslintrc
+.eslintignore
+.travis.yml
+launch-nodemon
+gulpfile.js
+nodemon.json
+yarn.lock
+yarn-error.log
+build/tests/
+build/**/*.js.map
+image.jpg

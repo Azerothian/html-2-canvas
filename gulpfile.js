@@ -32,6 +32,25 @@ gulp.task("compile", ["lint"], () => {
     .pipe(sourcemaps.write(".", {includeContent: false, sourceRoot: "../src/"}))
     .pipe(gulp.dest("build"));
 });
+
+gulp.task("compile:publish", ["lint"], () => {
+  return gulp.src(["src/**/*"])
+    .pipe(sourcemaps.init())
+    .pipe(babel({
+      "presets": [
+        "stage-0",
+        ["env", {
+          "targets": {
+            "browsers": ["last 2 versions", "ie >= 9"],
+          },
+          "useBuiltIns": true,
+        }],
+      ]})
+    )
+    .pipe(sourcemaps.write(".", {includeContent: false, sourceRoot: "../src/"}))
+    .pipe(gulp.dest("build/"));
+});
+
 gulp.task("copy", () => {
   return gulp.src(["src/**/*", "!src/**/*.js"])
     .pipe(gulp.dest("build"));
@@ -57,3 +76,4 @@ gulp.task("watch", () => {
 });
 
 gulp.task("default", ["test"]);
+
