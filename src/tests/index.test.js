@@ -8,7 +8,8 @@ import fs from "fs";
 import Html2Canvas from "../index";
 import Canvas from "canvas";
 
-const stylesheet = `body {
+const stylesheet = `
+body {
   font-family: Arial;
   font-size: 14px;
   padding: 5px;
@@ -19,33 +20,55 @@ p {
   padding-top: 0px;
   padding-left: 5px;
   padding-bottom: 5px;
-}`;
+}
+`;
 
 
 describe("base tests", () => {
   it("initial test", async() => {
     try {
       const html = `<html>
+  <head>
+    <style>
+      strong, b { 
+        font-weight: bold;
+      }
+      em, i, var { 
+        font-style: italic;
+      }
+      code, samp, kbd {
+        font-family: monospace;
+      }
+      center {
+        text-align: center;
+      }
+    </style>
+  </head>
   <body>
     <div class="row">
       <p><span>asdd<span style="font-size:36px; font-style: italic;">HELLO</span></span></p>
-      <p>Howdy<br />Stranger<br/><br/><br/>ASL?</p>
+      <p>Howdy&#x0022;&nbsp;&#x0022;<br /><strong>Stranger</strong><br/><br/><br/>lets play?</p>
       <p>2nd</p>
       <p style="text-align: right;">
         <span style="font-size: 12px;">3rd</span>4th
       </p>
-      <p style="width: 100px; background-color: rgba(255,255,255,0.3)">
-        111111
+      <p style="width: 50px;">
+        <span style="background-color: rgba(255,255,255,0.3);">1111111111<em><strong>111111</strong></em>11111111111</span>
       </p>
       <p style="background-color: rgba(255,255,255,0.5)">
         <span style="font-size: 12px">3rd</span>4th<br/>
         5th<span>lol</span>
         <span>asdd<span style="font-size:36px">HELLO</span></span>
       </p>
-      <!-- p style="background-color: rgba(255,255,255,0.1); text-align: center;">
+      <p style="background-color: rgba(255,255,255,0.1); text-align: center;">
         <img src="https://lh3.googleusercontent.com/6bYd0ESbr0b8MLVMv_CAT74WpyHOQSuE6NzDwey4Cw8DHkChPyZi263mIfJdJtwjSBs=w170" style="width: 100px; height: 100px;" />
       </p>
-      <img src="https://cdn.keycdn.com/img/cdn-secure.svg" style="width: 50px; height: 50px;" / -->
+      <p>
+        <center>Centered By Tag</center>
+      </p>
+      <div style="float: right; width: 100px; height: 100px;">
+
+      </div>
     </div>
   </body>
   </html>`;

@@ -9,7 +9,7 @@ import parsePx from "./utils/parse-px";
 import ElementRenderer from "./renderers/element";
 
 function applyStylesheet(stylesheet, dom) {
-  // console.log("defaultStylesheet", stylesheet.rules);
+  // console.log("stylesheet", stylesheet.rules);
   stylesheet.rules.forEach((rule) => {
     // console.log("rule", rule);
     rule.selectors.forEach((selector) => {
@@ -19,6 +19,15 @@ function applyStylesheet(stylesheet, dom) {
     });
   });
 }
+function applyInlineStylesheets(dom) {
+  const styleElements = CSSselect.selectAll("style", dom);
+  styleElements.forEach((style) => {
+    const {stylesheet} = parseCss(style.children[0].data);
+    return applyStylesheet(stylesheet, dom);
+  });
+
+}
+
 function applyStyleFormat(element, declarations) {
   if (!element.format) {
     element.format = {};
@@ -112,6 +121,20 @@ if (typeof window === "object") {
 export default class Html2Canvas {
   constructor(options = {}) {
     this.options = options;
+    this.lineTags = (options.lineTags || []).concat([ // list of tags that will be treated as side by side line element
+      "strong", "em", "code", "samp", "kbd", "var", "br", "img",
+      "span", "b", "i",
+    ]);
+    this.inheritableCSS = (options.inheritableCSS || []).concat([
+      "font",
+      "text",
+      "color",
+    ]);
+    this.doNotRender = (options.doNotRender || []).concat([
+      "head",
+      "style",
+      "link",
+    ]);
   }
   createCanvas(options) {
     if (this.options.createCanvas) {
@@ -142,6 +165,7 @@ export default class Html2Canvas {
     if (stylesheet) {
       applyStylesheet(stylesheet, dom);
     }
+    applyInlineStylesheets(dom);
     applyStyleTag(dom);
     const cx2d = canvas.getContext("2d");
 

@@ -3,11 +3,6 @@
 import merge from "../utils/merge";
 import LineRenderer from "./line";
 
-const inheritable = [
-  "font",
-  "text",
-  "color",
-];
 
 export default class ElementRenderer {
   constructor({element, parent, renderer}) {
@@ -22,8 +17,8 @@ export default class ElementRenderer {
     if (this.parent) {
       if (this.parent.format) {
         this.format = Object.keys(this.parent.format).reduce((s, key) => {
-          for (let x in inheritable) {
-            if (key.indexOf(inheritable[x]) > -1) {
+          for (let x in this.renderer.inheritableCSS) {
+            if (key.indexOf(this.renderer.inheritableCSS[x]) > -1) {
               if (!s[key]) {
                 s[key] = this.parent.format[key];
               } else if (typeof s[key] === "object" && typeof this.parent.format[key] === "object") {
@@ -35,11 +30,26 @@ export default class ElementRenderer {
           }
           return s;
         }, this.format);
+        // console.log("format", this.format);
       }
     }
     this.format = merge(this.format, element.format);
   }
   async process(yPos = 0) {
+    // console.log("this.element.name", this.element.name);
+    if (this.renderer.doNotRender.indexOf(this.element.name) > -1) {
+      // console.log("this.element.name", this.element.name);
+      this.bounding = {
+        top: 0,
+        left: 0,
+        width: 0,
+        topInner: 0,
+        leftInner: 0,
+        widthInner: 0,
+        height: 0,
+      };
+      return 0;
+    }
     const width = (this.format.width) ? this.format.width :
       this.parent.bounding.widthInner - this.format.margin.left - this.format.margin.right;
     const top = yPos + this.format.margin.top;
@@ -57,7 +67,7 @@ export default class ElementRenderer {
       let textElements = [];
       for (let x in this.element.children) {
         const child = this.element.children[x];
-        if (child.name === "br" || child.name === "span" || child.type === "text" || child.name === "img") {
+        if (this.renderer.lineTags.indexOf(child.name) > -1 || child.type === "text") {
           textElements.push(child);
         } else {
           if (textElements.length > 0) {

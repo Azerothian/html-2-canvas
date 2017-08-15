@@ -94,24 +94,53 @@ function getCharacterData(char, style, renderer) {
   ctx.restore();
   return info;
 }
+function mergeFormat(target, source, renderer) {
+  return Object.keys(source).reduce((s, key) => {
+    for (let x in renderer.inheritableCSS) {
+      if (key.indexOf(renderer.inheritableCSS[x]) > -1) {
+        if (!s[key]) {
+          s[key] = source[key];
+        } else if (typeof s[key] === "object" && typeof source[key] === "object") {
+          s[key] = merge({}, s[key], source[key]);
+        } else {
+          s[key] = source[key];
+        }
+      }
+    }
+    return s;
+  }, target);
+}
 
 
-function processElements(elements, renderer, parentFormat, parent) {
+
+// function processElements(elements, renderer, parentContainer, parentElement) {
+//   return elements.reduce(async(p, e) => {
+//     return p.then((a) => {
+
+//     });
+//   }, Promise.resolve([]));
+// }
+
+function processElements(elements, renderer, parentContainer, parentElement = {}) {
   return elements.reduce(async(p, e) => {
     return p.then(async(a) => {
+      e.format = merge({},
+        mergeFormat({}, parentContainer.format, renderer),
+        parentElement.format || {},
+        e.format
+      );
       if (e.type === "text" || e.name === "img" || e.name === "br") {
         try {
-          // console.log("PARENT FORMAT", parentFormat);
-          e.format = merge({}, parentFormat, (parent || {}).format || {}, e.format);
           if (e.name === "img") {
             e.data = await loadImage(e.attribs.src, renderer);
           }
           a.push(e);
         } catch (err) {
-          console.error(`error loading image, skipping element - ${e.attribs.src}`);
+          console.error(`error loading image, skipping element - ${e}`, err);
         }
       } else {
-        a = a.concat(await processElements(e.children, renderer, parentFormat, e));
+
+        a = a.concat(await processElements(e.children, renderer, parentContainer, e));
       }
       return a;
     });
@@ -133,7 +162,7 @@ export default class LineRenderer {
       width: this.parent.bounding.widthInner,
     };
     this.lines = [];
-    const flat = await processElements(this.elements, this.renderer, this.parent.format);
+    const flat = await processElements(this.elements, this.renderer, this.parent);
     let line = {
       width: 0,
       height: 0,
@@ -230,6 +259,12 @@ export default class LineRenderer {
         const data = currentLine.chars[i];
         x += (skip || 0);
         if (data.key) {
+          if (data.style.background) {
+            if (data.style.background.color) {
+              cx2d.fillStyle = data.style.background.color;
+              cx2d.fillRect(x, y - data.height, data.width, data.height);
+            }
+          }
           if (data.style.color) {
             cx2d.fillStyle = data.style.color;
           }
