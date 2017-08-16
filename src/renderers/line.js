@@ -1,7 +1,8 @@
 import {hashCode} from "../utils/hash";
 
 import merge from "../utils/merge";
-import parsePx from "../utils/parse-px";
+// import parsePx from "../utils/parse-px";
+import Size from "../utils/size";
 
 const cache = {
   images: {},
@@ -42,11 +43,9 @@ function loadImage(src, renderer) {
 
 }
 
-
-
-function getCharacterData(char, style, renderer) {
+function getCharacterData(char, style, element, renderer) {
   let font = style.font;
-  let fontSize = 0;
+  let fontHeight = 0;
   if (!font) {
     console.error("font is not defined unable to set");
   } else if (typeof font === "object") {
@@ -61,11 +60,11 @@ function getCharacterData(char, style, renderer) {
       a.push(font.weight);
     }
     if (font.size && (style.line || {}).height) {
-      fontSize = font.size;
-      a.push(`${font.size}px/${style.line.height}px`);
+      fontHeight = font.size.valueOf(element);
+      a.push(`${fontHeight}px/${style.line.height}px`);
     } else if (font.size) {
-      fontSize = font.size;
-      a.push(`${font.size}px`);
+      fontHeight = font.size.valueOf(element);
+      a.push(`${fontHeight}px`);
     }
     if (font.family) {
       a.push(font.family);
@@ -75,18 +74,19 @@ function getCharacterData(char, style, renderer) {
     const e = font.split(" ");
     const val = e[e.length - 2];
     if (val.indexOf("/") > -1) {
-      fontSize = parsePx(val.split("/")[0]);
+      fontHeight = new Size(val.split("/")[0]).valueOf(element);
     } else {
-      fontSize = parsePx(val);
+      fontHeight = new Size(val).valueOf(element);
     }
   }
 
   const ctx = getBuffer(renderer);
   ctx.save();
   ctx.font = font;
+  // console.log("fontHeight", fontHeight);
   let info = {
     key: char,
-    height: fontSize,
+    height: fontHeight,
     width: ctx.measureText(char).width,
     font,
     style,
@@ -156,9 +156,9 @@ export default class LineRenderer {
   }
   async process(yPos) {
     this.bounding = {
-      top: yPos,
+      top: new Size(yPos),
       left: this.parent.bounding.leftInner,
-      height: 0,
+      height: Size.zero(),
       width: this.parent.bounding.widthInner,
     };
     this.lines = [];
@@ -173,9 +173,9 @@ export default class LineRenderer {
       const element = flat[x];
       if (element.name === "br") {
         if (line.height === 0) {
-          line.height = element.format.font.size;
+          line.height = element.format.font.size.valueOf(element);
         }
-        this.bounding.height += line.height;
+        this.bounding.height = this.bounding.height.add(line.height);
         this.lines.push(line);
         line = {
           width: 0,
@@ -184,8 +184,8 @@ export default class LineRenderer {
         };
       } else if (element.name === "img") {
         const img = element.data;
-        const imgWidth = (element.format || {}).width || img.width;
-        const imgHeight = (element.format || {}).height || img.height;
+        const imgWidth = (element.format || {}).width.valueOf(element) || img.width;
+        const imgHeight = (element.format || {}).height.valueOf(element) || img.height;
         if ((imgWidth + line.width) > this.bounding.width && line.chars.length > 0) {
           this.lines.push(line);
           line = {
@@ -208,9 +208,9 @@ export default class LineRenderer {
         const text = (element.data || "").trim();
         if (text.length > 0) {
           for (let i = 0; i < text.length; i++) {
-            const data = getCharacterData(text[i], element.format, this.renderer);
+            const data = getCharacterData(text[i], element.format, element, this.renderer);
             if ((data.width + line.width) > this.bounding.width) {
-              this.bounding.height += line.height;
+              this.bounding.height = this.bounding.height.add(line.height);
               this.lines.push(line);
               line = {
                 width: 0,
@@ -229,21 +229,21 @@ export default class LineRenderer {
       }
     }
     if (line.height > 0) {
-      this.bounding.height += line.height;
+      this.bounding.height = this.bounding.height.add(line.height);
       this.lines.push(line);
     }
-    return this.bounding.height;
+    return this.bounding.height.valueOf();
   }
   render(cx2d) {
-    let x = this.bounding.left;
-    let y = this.bounding.top;
+    let x = this.bounding.left.valueOf();
+    let y = this.bounding.top.valueOf();
     cx2d.save();
     for (let s = 0; s < this.lines.length; s++) {
       const currentLine = this.lines[s];
       y += (currentLine.height);
 
       let skip = 0;
-      const freeSpace = (this.bounding.width - currentLine.width);
+      const freeSpace = (this.bounding.width.valueOf() - currentLine.width);
       switch ((this.parent.format.text || {}).align || "left") {
         case "center":
           x += (freeSpace / 2);
@@ -276,7 +276,7 @@ export default class LineRenderer {
         }
         x += data.width + (skip || 0);
       }
-      x = this.bounding.left;
+      x = this.bounding.left.valueOf();
     }
     cx2d.restore();
   }

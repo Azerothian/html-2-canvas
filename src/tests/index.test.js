@@ -7,26 +7,91 @@ import fs from "fs";
 
 import Html2Canvas from "../index";
 import Canvas from "canvas";
+import expect from "expect";
 
-const stylesheet = `
-body {
-  font-family: Arial;
-  font-size: 14px;
-  padding: 5px;
-  background-color: rgba(0,0,0);
-  color: #fff;
-}
-p {
-  padding-top: 0px;
-  padding-left: 5px;
-  padding-bottom: 5px;
-}
+
+
+describe("renderer tests", () => {
+  it("spacing test", async() => {
+    const html = "<html><body>Test</body></html>";
+    const style = "body { background-color: #fff; color: #000; font-family: Arial; font-size: 12px; width: 50%; margin-left: 25%; margin-top: 50px; padding: 10px; text-align: center;}";
+    const canvas = new Canvas(150, 150);
+    const renderer = new Html2Canvas({
+      stylesheet: style,
+      createCanvas({height, width}) {
+        return new Canvas(height, width);
+      },
+      createImage() {
+        return new Canvas.Image();
+      },
+      fetch: fetch,
+    });
+    const dom = await renderer.process(html, canvas);
+    const body = dom.children[0].children[0];
+    expect(body.element.name).toEqual("body");
+    const expectedWidth = (canvas.width * 0.50);
+    expect(body.bounding.width.valueOf()).toEqual(expectedWidth);
+    await renderer.render();
+    canvas.createJPEGStream().pipe(fs.createWriteStream(path.join(process.cwd(), "output/padding.jpg")));
+  });
+  it("font em test", async() => {
+    const html = `<html>
+<body>
+  <div class="first">
+    <div class="second">
+      Test
+    </div>
+  </div>
+</body>
+</html
 `;
 
+    const style = `body {
+      background-color: #fff; color: #000; font-family: Arial; font-size: 10px;
+    }
+    .first {
+      font-size: 1.1em;
+    }
+    .second {
+      font-size: 1.5em;
+    }
+    `;
+    const canvas = new Canvas(150, 150);
+    const renderer = new Html2Canvas({
+      stylesheet: style,
+      createCanvas({height, width}) {
+        return new Canvas(height, width);
+      },
+      createImage() {
+        return new Canvas.Image();
+      },
+      fetch: fetch,
+    });
+    const dom = await renderer.process(html, canvas);
+    const secondDiv = dom.children[0].children[0].children[0].children[0].children[0];
+    // expect(secondDiv.element.name).toEqual("div");
+    // console.log("secondDiv", secondDiv.bounding);
+    await renderer.render();
+    canvas.createJPEGStream().pipe(fs.createWriteStream(path.join(process.cwd(), "output/font.jpg")));
+  });
 
-describe("base tests", () => {
-  it("initial test", async() => {
+  it("example test", async() => {
     try {
+      const style = `
+      body {
+        font-family: Arial;
+        font-size: 14px;
+        padding: 5px;
+        background-color: rgba(0,0,0);
+        color: #fff;
+      }
+      p {
+        padding-top: 0px;
+        padding-left: 5px;
+        padding-bottom: 5px;
+      }
+      `;
+      
       const html = `<html>
   <head>
     <style>
@@ -74,7 +139,7 @@ describe("base tests", () => {
   </html>`;
       const canvas = new Canvas(500, 500);
       const renderer = new Html2Canvas({
-        stylesheet,
+        stylesheet: style,
         createCanvas({height, width}) {
           return new Canvas(height, width);
         },
@@ -83,10 +148,12 @@ describe("base tests", () => {
         },
         fetch: fetch,
       });
-      await renderer.render(html, canvas);
-      canvas.createJPEGStream().pipe(fs.createWriteStream(path.join(process.cwd(), "image.jpg")));
+      await renderer.process(html, canvas);
+      await renderer.render();
+      canvas.createJPEGStream().pipe(fs.createWriteStream(path.join(process.cwd(), "output/example.jpg")));
     } catch (err) {
       console.log("err", err);
+      expect(err).toNotExist();
     }
   });
 });

@@ -4,7 +4,8 @@ import * as parse5 from "parse5";
 import parseCss from "css-parse";
 import CSSselect from "css-select";
 
-import parsePx from "./utils/parse-px";
+// import parsePx from "./utils/parse-px";
+import Size from "./utils/size";
 
 import ElementRenderer from "./renderers/element";
 
@@ -45,13 +46,19 @@ function applyStyleFormat(element, declarations) {
           element.format[k[0]] = {};
         }
         if (typeof element.format[k[0]] !== "string") {
-          element.format[k[0]][k[1]] = parsePx(v);
+          if (Size.test(v)) {
+            element.format[k[0]][k[1]] = new Size(v);
+          } else {
+            element.format[k[0]][k[1]] = v;
+          }
         }
       }
     } else if (property === "margin" || property === "padding") {
       element.format[property] = extractShorthandSpacing(v);
+    } else if (Size.test(v)) {
+      element.format[property] = new Size(v);
     } else {
-      element.format[property] = parsePx(v);
+      element.format[property] = v;
     }
   });
 }
@@ -73,7 +80,7 @@ function applyStyleTag(node) {
 }
 
 function extractShorthandSpacing(s) {
-  const e = s.split(" ").map((r) => parsePx(r));
+  const e = s.split(" ").map((r) => new Size(r));
   if (e.length === 1) {
     return {
       top: e[0],
@@ -157,7 +164,7 @@ export default class Html2Canvas {
     }
     return fetch.apply(undefined, arguments);
   }
-  async render(html, canvas) {
+  async process(html, canvas) {
     let {stylesheet} = (this.options.stylesheet) ? parseCss(this.options.stylesheet) : {};
     const dom = parse5.parse(html, {
       treeAdapter: parse5.treeAdapters.htmlparser2,
@@ -167,21 +174,28 @@ export default class Html2Canvas {
     }
     applyInlineStylesheets(dom);
     applyStyleTag(dom);
-    const cx2d = canvas.getContext("2d");
+    this.dom = dom;
+    this.canvas = canvas;
+    this.width = canvas.width;
+    this.height = canvas.height;
 
-    const rootElement = new ElementRenderer({
+    this.rootElement = new ElementRenderer({
       element: dom,
       parent: {
         bounding: {
-          topInner: 0,
-          leftInner: 0,
-          widthInner: canvas.width,
-          height: 0
+          topInner: Size.zero(),
+          leftInner: Size.zero(),
+          widthInner: new Size(`${canvas.width}px`),
+          height: Size.zero(),
         },
       },
       renderer: this,
     });
-    await rootElement.process();
-    await rootElement.render(cx2d);
+    await this.rootElement.process();
+    return this.rootElement;
+  }
+  async render() {
+    const cx2d = this.canvas.getContext("2d");
+    await this.rootElement.render(cx2d);
   }
 }

@@ -2,6 +2,16 @@
 
 import merge from "../utils/merge";
 import LineRenderer from "./line";
+import Size from "../utils/size";
+
+function createBox() {
+  return {
+    top: Size.zero(),
+    bottom: Size.zero(),
+    left: Size.zero(),
+    right: Size.zero(),
+  };
+}
 
 
 export default class ElementRenderer {
@@ -11,8 +21,8 @@ export default class ElementRenderer {
     this.parent = parent;
     this.renderer = renderer;
     this.format = {
-      padding: {top: 0, bottom: 0, left: 0, right: 0},
-      margin: {top: 0, bottom: 0, left: 0, right: 0},
+      padding: createBox(),
+      margin: createBox(),
     };
     if (this.parent) {
       if (this.parent.format) {
@@ -21,7 +31,11 @@ export default class ElementRenderer {
             if (key.indexOf(this.renderer.inheritableCSS[x]) > -1) {
               if (!s[key]) {
                 s[key] = this.parent.format[key];
-              } else if (typeof s[key] === "object" && typeof this.parent.format[key] === "object") {
+              } else if (typeof s[key] === "object"
+                && typeof this.parent.format[key] === "object"
+                && !(this.parent.format[key] instanceof Size)
+                && !(s[key] instanceof Size)
+              ) {
                 s[key] = merge({}, s[key], this.parent.format[key]);
               } else {
                 s[key] = this.parent.format[key];
@@ -36,32 +50,39 @@ export default class ElementRenderer {
     this.format = merge(this.format, element.format);
   }
   async process(yPos = 0) {
-    // console.log("this.element.name", this.element.name);
     if (this.renderer.doNotRender.indexOf(this.element.name) > -1) {
-      // console.log("this.element.name", this.element.name);
-      this.bounding = {
-        top: 0,
-        left: 0,
-        width: 0,
-        topInner: 0,
-        leftInner: 0,
-        widthInner: 0,
-        height: 0,
-      };
+      this.bounding = Object.assign(
+        createBox(),
+        {
+          topInner: Size.zero(),
+          leftInner: Size.zero(),
+          widthInner: Size.zero(),
+          height: Size.zero(),
+        }
+      );
       return 0;
     }
-    const width = (this.format.width) ? this.format.width :
-      this.parent.bounding.widthInner - this.format.margin.left - this.format.margin.right;
-    const top = yPos + this.format.margin.top;
-    const left = this.parent.bounding.leftInner + this.format.margin.left;
+    const parentWidthInner = this.parent.bounding.widthInner;
+    // console.log("this.format.width", this.format.width);
+    const width = (this.format.width) ?
+      new Size(this.format.width.valueOf(this.element, parentWidthInner)) : // convert width to px if needed
+      parentWidthInner.subtract(
+        this.format.margin.left.valueOf(this.element, parentWidthInner),
+        this.format.margin.right.valueOf(this.element, parentWidthInner)
+      );
+    const top = this.format.margin.top.add(yPos);
+    yPos += this.format.margin.top.valueOf(this.element);
+    const left = this.parent.bounding.leftInner.add(
+      this.format.margin.left.valueOf(this.element, parentWidthInner)
+    );
     this.bounding = {
       top,
       left,
       width,
-      topInner: top + this.format.padding.top,
-      leftInner: left + this.format.padding.left,
-      widthInner: width - this.format.padding.left - this.format.padding.right,
-      height: 0,
+      topInner: top.add(this.format.padding.top.valueOf(this.element)),
+      leftInner: left.add(this.format.padding.left.valueOf(this.element)),
+      widthInner: width.subtract(this.format.padding.left.valueOf(this.element), this.format.padding.right.valueOf(this.element)),
+      height: Size.zero(),
     };
     if (this.element.children) {
       let textElements = [];
@@ -103,8 +124,8 @@ export default class ElementRenderer {
         }
       }
     }
-    this.bounding.height += (yPos + this.format.padding.bottom);
-    const result = this.bounding.height + this.format.margin.bottom;
+    this.bounding.height = this.bounding.height.add(yPos, this.format.padding.bottom.valueOf(this.element));
+    const result = this.bounding.height + this.format.margin.bottom.valueOf(this.element);
     return result;
   }
   async render(cx2d) {
@@ -112,7 +133,7 @@ export default class ElementRenderer {
     if (this.format.background) {
       if (this.format.background.color) {
         cx2d.beginPath();
-        cx2d.rect(this.bounding.left, this.bounding.top, this.bounding.width, this.bounding.height - this.bounding.top);
+        cx2d.rect(this.bounding.left.valueOf(), this.bounding.top.valueOf(), this.bounding.width.valueOf(), this.bounding.height.valueOf() - this.bounding.top.valueOf());
         cx2d.fillStyle = this.format.background.color;
         cx2d.fill();
       }

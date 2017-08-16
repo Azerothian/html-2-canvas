@@ -4,7 +4,7 @@ This a pure javascript html renderer for canvas, using the libraries parse5, css
 
 It is intended for use with both node with (node-canvas), and the latest browsers.
 
-![Demo](/image.jpg?raw=true "Demo")
+![Demo](/output/example.jpg?raw=true "Demo")
 
 ## Caveats
 
@@ -12,10 +12,18 @@ It is intended for use with both node with (node-canvas), and the latest browser
 - Treats all elements as div's except for tags the following tags
   - span, strong, em, code, samp, kbd, var, b
   - This can be expanded on via options.lineTags: [String]
-- only uses pixels for size references
 - font*, text*, color are the only style tags that get applied to children elements.
 - fetch is required for downloading images. a polyfill (whatwg-fetch) for unsupported browsers and for node support it needs to be passed as an option.fetch: fetch.
-- font-size and font-family must be defined for text to render.
+- font-size and font-family must be defined on any parent element for text to render.
+- for webpack you need to add the following to config for it to compile
+
+```json
+{
+  "node": {
+    "fs": "empty"
+  }
+}
+```
 
 ## Supported Html Tags
 
@@ -34,6 +42,7 @@ It is intended for use with both node with (node-canvas), and the latest browser
 - color
 - background-color
 - width
+- em and % text sizing.
 
 ```css
 body {
@@ -64,16 +73,15 @@ center {
 ```
 
 ### Planned Support
+
 - text-decoration
 - background (shorthand and expanded)
 - border (shorthand and expanded)
-- em and % text sizing.
 - transform
 - box-shadow
 - position
 - margin: auto
-- float: left, right
-- clear: both
+- float: left, right, clear: both
 
 ## TODO
 
@@ -173,10 +181,18 @@ p {
 ```
 
 ## Change Log
+
 ### 0.0.2
+
 - added support for inline styles
 - line elements can now use background color
 - added lineTags as an options to extend the classification of line typed element
 - fixed css inheritancy issue between the parent element and the line elements
 - fixed render issue for non renderable elements, added option.doNotRender: [String]
 - fixed render issue with children line elements chaining styles from parent line elements
+
+### 0.0.3
+
+- added support for all css sizing units for all elements
+- separated out process and render from core render func
+- added test cases for new size unit class

@@ -4,8 +4,10 @@
  * @param item
  * @returns {boolean}
  */
+import Size from "./size";
+
 export function isObject(item) {
-  return (item && typeof item === "object" && !Array.isArray(item));
+  return (item && typeof item === "object" && !Array.isArray(item) && !(item instanceof Size) );
 }
 
 /**
