@@ -82,9 +82,18 @@ export default class Size extends Number {
   valueOf(element, modifier) {
     switch ((this.measure || "").toLowerCase()) {
       case "em":
-        // console.log("element.parent", element.parent)
-        let baseSize = element.parent.format.font.size.valueOf(element.parent);
-        // console.log("baseSize", baseSize, this.val);
+        let target, current = element.parent;
+        do { //eslint-disable-line
+          if (((current.format || {}).font || {}).size) {
+            target = ((current.format || {}).font || {}).size;
+            break;
+          }
+          if (!current.parent) {
+            throw new Error("unable to find parent font size");
+          }
+          current = current.parent;
+        } while (true);
+        let baseSize = target.valueOf(element.parent);
         return this.val * baseSize;
       case "vw":
         return (this.val / 100) * element.renderer.width;

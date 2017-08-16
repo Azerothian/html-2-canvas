@@ -196,3 +196,7 @@ p {
 - added support for all css sizing units for all elements
 - separated out process and render from core render func
 - added test cases for new size unit class
+
+### 0.0.4
+
+- patch for recursive em font sizing

@@ -72,4 +72,30 @@ describe("size tests", () => {
     expect(result).toEqual(15);
 
   });
+
+  it("em test", () => {
+    const testStructure = {
+      parent: {
+        parent: {
+          parent: {
+            format: {
+              font: {
+                size: new Size("10px"),
+              }
+            }
+          },
+          format: {}
+        },
+        format: {
+          font: {
+            size: new Size("1.5em"),
+          }
+        }
+      }
+    };
+    const result = new Size("1em").valueOf(testStructure);
+    expect(result).toEqual(15);
+
+  });
+
 });
