@@ -1,8 +1,6 @@
-import {hashCode} from "../utils/hash";
-
-import merge from "../utils/merge";
-// import parsePx from "../utils/parse-px";
-import UnitSize from "../utils/unit-size";
+import {hashCode} from "./utils/hash";
+import merge from "./utils/merge";
+import UnitSize from "./unit-size";
 
 const cache = {
   images: {},
@@ -45,7 +43,7 @@ function loadImage(src, renderer) {
 
 function getCharacterData(char, style, element, renderer) {
   let font = style.font;
-  let fontHeight = 0;
+  let fontHeight = 0, lineHeight = 0;
   if (!font) {
     console.error("font is not defined unable to set");
   } else if (typeof font === "object") {
@@ -61,10 +59,12 @@ function getCharacterData(char, style, element, renderer) {
     }
     if (font.size && (style.line || {}).height) {
       fontHeight = font.size.valueOf(element);
-      a.push(`${fontHeight}px/${style.line.height}px`);
+      lineHeight = style.line.height.valueOf(element);
+      a.push(`${fontHeight}px/${lineHeight}px`);
     } else if (font.size) {
       fontHeight = font.size.valueOf(element);
-      a.push(`${fontHeight}px`);
+      lineHeight = fontHeight;
+      a.push(`${fontHeight}px/${fontHeight}px`);
     }
     if (font.family) {
       a.push(font.family);
@@ -74,9 +74,12 @@ function getCharacterData(char, style, element, renderer) {
     const e = font.split(" ");
     const val = e[e.length - 2];
     if (val.indexOf("/") > -1) {
-      fontHeight = new UnitSize(val.split("/")[0]).valueOf(element);
+      let rr = val.split("/");
+      lineHeight = new UnitSize(rr[1]).valueOf(element);
+      fontHeight = new UnitSize(rr[0]).valueOf(element);
     } else {
       fontHeight = new UnitSize(val).valueOf(element);
+      lineHeight = fontHeight;
     }
   }
 
@@ -86,7 +89,7 @@ function getCharacterData(char, style, element, renderer) {
   // console.log("fontHeight", fontHeight);
   let info = {
     key: char,
-    height: fontHeight,
+    height: lineHeight,
     width: ctx.measureText(char).width,
     font,
     style,
@@ -205,7 +208,7 @@ export default class LineRenderer {
         }
         line.width += imgWidth;
       } else if (element.type === "text") {
-        const text = (element.data || "").trim();
+        const text = (element.data || "");
         if (text.length > 0) {
           for (let i = 0; i < text.length; i++) {
             const data = getCharacterData(text[i], element.format, element, this.renderer);

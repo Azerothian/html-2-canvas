@@ -1,8 +1,7 @@
 import sourceMapSupport from "source-map-support";
 sourceMapSupport.install();
 import expect from "expect";
-
-import UnitSize from "../utils/unit-size";
+import UnitSize from "../unit-size";
 
 
 describe("size tests", () => {
@@ -73,7 +72,7 @@ describe("size tests", () => {
 
   });
 
-  it("em test", () => {
+  it("em compare check", () => {
     const size = new UnitSize("1.5em");
     const testStructure = {
       parent: {

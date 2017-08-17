@@ -39,7 +39,7 @@ describe("renderer tests", () => {
 <body>
   <div class="first">
     <div class="second">
-      Test
+      <p>Test <span>asd</span</p>
     </div>
   </div>
 </body>
@@ -47,13 +47,14 @@ describe("renderer tests", () => {
 `;
 
     const style = `body {
-      background-color: #fff; color: #000; font-family: Arial; font-size: 10px;
+      background-color: #fff; color: #000; 
+      font-family: Arial; font-size: 10px;
     }
     .first {
-      font-size: 1.1em;
+      font-size: 1.5em;
     }
     .second {
-      font-size: 1.5em;
+      font-size: 1.1em;
     }
     `;
     const canvas = new Canvas(150, 150);
@@ -68,9 +69,8 @@ describe("renderer tests", () => {
       fetch: fetch,
     });
     const dom = await renderer.process(html, canvas);
-    const secondDiv = dom.children[0].children[0].children[0].children[0].children[0];
-    // expect(secondDiv.element.name).toEqual("div");
-    // console.log("secondDiv", secondDiv.bounding);
+    const line = dom.children[0].children[0].children[0].children[0].children[0];
+    expect(line.bounding.height.valueOf()).toEqual(16.5);
     await renderer.render();
     canvas.createJPEGStream().pipe(fs.createWriteStream(path.join(process.cwd(), "output/font.jpg")));
   });
@@ -91,7 +91,6 @@ describe("renderer tests", () => {
         padding-bottom: 5px;
       }
       `;
-      
       const html = `<html>
   <head>
     <style>

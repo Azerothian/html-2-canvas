@@ -4,7 +4,7 @@
  * @param item
  * @returns {boolean}
  */
-import UnitSize from "./unit-size";
+import UnitSize from "../unit-size";
 
 export function isObject(item) {
   return (item && typeof item === "object" && !Array.isArray(item) && !(item instanceof UnitSize) );

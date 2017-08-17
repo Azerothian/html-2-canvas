@@ -82,7 +82,7 @@ export default class UnitSize {
   valueOf(element, modifier) {
     switch ((this.measure || "").toLowerCase()) {
       case "em":
-        let target, current = element;
+        let target, current = element.parent;
         do { //eslint-disable-line
           let {size} = ((current.format || {}).font || {});
           if (size && size !== this) {
@@ -90,12 +90,13 @@ export default class UnitSize {
             break;
           }
           if (!current.parent) {
-            throw new Error("unable to find parent font size");
+            throw new Error("unable to find parent font size", current);
           }
           current = current.parent;
         } while (true);
-        let baseUnitSize = target.valueOf(element.parent);
-        return this.val * baseUnitSize;
+        let baseUnitSize = target.valueOf(current);
+        let result = this.val * baseUnitSize;
+        return result;
       case "vw":
         return (this.val / 100) * element.renderer.width;
       case "vh":

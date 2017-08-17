@@ -1,8 +1,6 @@
-
-
-import merge from "../utils/merge";
+import merge from "./utils/merge";
 import LineRenderer from "./line";
-import UnitSize from "../utils/unit-size";
+import UnitSize from "./unit-size";
 
 function createBox() {
   return {

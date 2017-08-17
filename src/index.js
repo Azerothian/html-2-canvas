@@ -4,17 +4,12 @@ import * as parse5 from "parse5";
 import parseCss from "css-parse";
 import CSSselect from "css-select";
 
-// import parsePx from "./utils/parse-px";
-import UnitSize from "./utils/unit-size";
-
-import ElementRenderer from "./renderers/element";
+import UnitSize from "./unit-size";
+import ElementRenderer from "./element";
 
 function applyStylesheet(stylesheet, dom) {
-  // console.log("stylesheet", stylesheet.rules);
   stylesheet.rules.forEach((rule) => {
-    // console.log("rule", rule);
     rule.selectors.forEach((selector) => {
-      // console.log("selector", selector);
       const elements = CSSselect.selectAll(selector, dom);
       elements.forEach((element) => applyStyleFormat(element, rule.declarations));
     });
@@ -166,7 +161,7 @@ export default class Html2Canvas {
   }
   async process(html, canvas) {
     let {stylesheet} = (this.options.stylesheet) ? parseCss(this.options.stylesheet) : {};
-    const dom = parse5.parse(html, {
+    const dom = parse5.parse(html.split(/\n|\r\n/).reduce((h, s) => `${h}${s.trim()}`, ""), {
       treeAdapter: parse5.treeAdapters.htmlparser2,
     });
     if (stylesheet) {

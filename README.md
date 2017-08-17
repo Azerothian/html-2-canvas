@@ -213,3 +213,9 @@ p {
 ### 0.0.7
 
 - yes it does.
+
+### 0.0.8
+- Added trim to preprocess each line of the html file instead of trimming the elements
+- another em inheritancy fix
+- cleaned up files to be a little bit more coherent
+- Adjusted line renderer to allow for setting line-height
