@@ -1,6 +1,6 @@
 const sizeCheck = /([0-9|\.]*)([a-zA-Z|%]*)/;
 
-export default class Size extends Number {
+export default class Size {
   static test(e) {
     if (!isNaN(parseFloat(e))) {
       return true;
@@ -36,7 +36,7 @@ export default class Size extends Number {
     return a.equals(b);
   }
   constructor(s) {
-    super();
+    // super();
     // console.log("construct", s);
     if (typeof s === "number") {
       this.val = s;
@@ -82,10 +82,11 @@ export default class Size extends Number {
   valueOf(element, modifier) {
     switch ((this.measure || "").toLowerCase()) {
       case "em":
-        let target, current = element.parent;
+        let target, current = element;
         do { //eslint-disable-line
-          if (((current.format || {}).font || {}).size) {
-            target = ((current.format || {}).font || {}).size;
+          let {size} = ((current.format || {}).font || {});
+          if (size && size !== this) {
+            target = size;
             break;
           }
           if (!current.parent) {

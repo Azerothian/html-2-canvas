@@ -200,3 +200,8 @@ p {
 ### 0.0.4
 
 - patch for recursive em font sizing
+
+### 0.0.5
+
+- removed inheritancy of number with unit size class as it breaks object compare.
+- stopped em calculation from multipling on it self.

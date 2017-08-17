@@ -8,10 +8,10 @@ import Size from "../utils/size";
 describe("size tests", () => {
   it("instance test", () => {
     const result = new Size(1);
-    expect(result instanceof Number).toBeTruthy();
+    // expect(result instanceof Number).toBeTruthy();
     expect(result instanceof Size).toBeTruthy();
     expect(typeof result).toEqual("object");
-    expect(typeof result).toNotEqual("number");
+    // expect(typeof result).toNotEqual("number");
   });
   it("equals test", () => {
     // console.log("test", Size.zero() == Size.zero()); //eslint-disable-line
@@ -74,6 +74,7 @@ describe("size tests", () => {
   });
 
   it("em test", () => {
+    const size = new Size("1.5em");
     const testStructure = {
       parent: {
         parent: {
@@ -81,21 +82,34 @@ describe("size tests", () => {
             format: {
               font: {
                 size: new Size("10px"),
-              }
-            }
+              },
+            },
           },
-          format: {}
+          format: {
+            font: {
+              size: size,
+            },
+          },
         },
         format: {
           font: {
-            size: new Size("1.5em"),
-          }
-        }
-      }
+            size: size,
+          },
+        },
+      },
     };
     const result = new Size("1em").valueOf(testStructure);
     expect(result).toEqual(15);
 
   });
-
+  it("object compare", () => { // issue with inheriting number and object compare
+    const test = new Size(33);
+    const ob1 = {
+      x: test,
+    };
+    const ob2 = {
+      y: test,
+    };
+    expect(ob1.x === ob2.y).toBeTruthy();
+  });
 });
