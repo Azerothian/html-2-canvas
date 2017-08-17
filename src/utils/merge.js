@@ -4,10 +4,10 @@
  * @param item
  * @returns {boolean}
  */
-import Size from "./size";
+import UnitSize from "./unit-size";
 
 export function isObject(item) {
-  return (item && typeof item === "object" && !Array.isArray(item) && !(item instanceof Size) );
+  return (item && typeof item === "object" && !Array.isArray(item) && !(item instanceof UnitSize) );
 }
 
 /**

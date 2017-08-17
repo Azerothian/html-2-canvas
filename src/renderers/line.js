@@ -2,7 +2,7 @@ import {hashCode} from "../utils/hash";
 
 import merge from "../utils/merge";
 // import parsePx from "../utils/parse-px";
-import Size from "../utils/size";
+import UnitSize from "../utils/unit-size";
 
 const cache = {
   images: {},
@@ -74,9 +74,9 @@ function getCharacterData(char, style, element, renderer) {
     const e = font.split(" ");
     const val = e[e.length - 2];
     if (val.indexOf("/") > -1) {
-      fontHeight = new Size(val.split("/")[0]).valueOf(element);
+      fontHeight = new UnitSize(val.split("/")[0]).valueOf(element);
     } else {
-      fontHeight = new Size(val).valueOf(element);
+      fontHeight = new UnitSize(val).valueOf(element);
     }
   }
 
@@ -156,9 +156,9 @@ export default class LineRenderer {
   }
   async process(yPos) {
     this.bounding = {
-      top: new Size(yPos),
+      top: new UnitSize(yPos),
       left: this.parent.bounding.leftInner,
-      height: Size.zero(),
+      height: UnitSize.zero(),
       width: this.parent.bounding.widthInner,
     };
     this.lines = [];

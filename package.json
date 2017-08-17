@@ -1,6 +1,6 @@
 {
   "name": "html-2-canvas",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "main": "build/index.js",
   "repository": "https://github.com/Azerothian/html-2-canvas.git",
   "description": "html renderer for canvas",
@@ -20,7 +20,7 @@
     "build/renderers/element.js",
     "build/utils/hash.js",
     "build/utils/merge.js",
-    "build/utils/size.js"
+    "build/utils/unit-size.js"
   ],
   "dependencies": {
     "babel-polyfill": "^6.23.0",

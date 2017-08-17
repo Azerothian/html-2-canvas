@@ -2,14 +2,14 @@
 
 import merge from "../utils/merge";
 import LineRenderer from "./line";
-import Size from "../utils/size";
+import UnitSize from "../utils/unit-size";
 
 function createBox() {
   return {
-    top: Size.zero(),
-    bottom: Size.zero(),
-    left: Size.zero(),
-    right: Size.zero(),
+    top: UnitSize.zero(),
+    bottom: UnitSize.zero(),
+    left: UnitSize.zero(),
+    right: UnitSize.zero(),
   };
 }
 
@@ -33,8 +33,8 @@ export default class ElementRenderer {
                 s[key] = this.parent.format[key];
               } else if (typeof s[key] === "object"
                 && typeof this.parent.format[key] === "object"
-                && !(this.parent.format[key] instanceof Size)
-                && !(s[key] instanceof Size)
+                && !(this.parent.format[key] instanceof UnitSize)
+                && !(s[key] instanceof UnitSize)
               ) {
                 s[key] = merge({}, s[key], this.parent.format[key]);
               } else {
@@ -54,10 +54,10 @@ export default class ElementRenderer {
       this.bounding = Object.assign(
         createBox(),
         {
-          topInner: Size.zero(),
-          leftInner: Size.zero(),
-          widthInner: Size.zero(),
-          height: Size.zero(),
+          topInner: UnitSize.zero(),
+          leftInner: UnitSize.zero(),
+          widthInner: UnitSize.zero(),
+          height: UnitSize.zero(),
         }
       );
       return 0;
@@ -65,7 +65,7 @@ export default class ElementRenderer {
     const parentWidthInner = this.parent.bounding.widthInner;
     // console.log("this.format.width", this.format.width);
     const width = (this.format.width) ?
-      new Size(this.format.width.valueOf(this.element, parentWidthInner)) : // convert width to px if needed
+      new UnitSize(this.format.width.valueOf(this.element, parentWidthInner)) : // convert width to px if needed
       parentWidthInner.subtract(
         this.format.margin.left.valueOf(this.element, parentWidthInner),
         this.format.margin.right.valueOf(this.element, parentWidthInner)
@@ -82,7 +82,7 @@ export default class ElementRenderer {
       topInner: top.add(this.format.padding.top.valueOf(this.element)),
       leftInner: left.add(this.format.padding.left.valueOf(this.element)),
       widthInner: width.subtract(this.format.padding.left.valueOf(this.element), this.format.padding.right.valueOf(this.element)),
-      height: Size.zero(),
+      height: UnitSize.zero(),
     };
     if (this.element.children) {
       let textElements = [];

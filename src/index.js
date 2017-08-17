@@ -5,7 +5,7 @@ import parseCss from "css-parse";
 import CSSselect from "css-select";
 
 // import parsePx from "./utils/parse-px";
-import Size from "./utils/size";
+import UnitSize from "./utils/unit-size";
 
 import ElementRenderer from "./renderers/element";
 
@@ -46,8 +46,8 @@ function applyStyleFormat(element, declarations) {
           element.format[k[0]] = {};
         }
         if (typeof element.format[k[0]] !== "string") {
-          if (Size.test(v)) {
-            element.format[k[0]][k[1]] = new Size(v);
+          if (UnitSize.test(v)) {
+            element.format[k[0]][k[1]] = new UnitSize(v);
           } else {
             element.format[k[0]][k[1]] = v;
           }
@@ -55,8 +55,8 @@ function applyStyleFormat(element, declarations) {
       }
     } else if (property === "margin" || property === "padding") {
       element.format[property] = extractShorthandSpacing(v);
-    } else if (Size.test(v)) {
-      element.format[property] = new Size(v);
+    } else if (UnitSize.test(v)) {
+      element.format[property] = new UnitSize(v);
     } else {
       element.format[property] = v;
     }
@@ -80,7 +80,7 @@ function applyStyleTag(node) {
 }
 
 function extractShorthandSpacing(s) {
-  const e = s.split(" ").map((r) => new Size(r));
+  const e = s.split(" ").map((r) => new UnitSize(r));
   if (e.length === 1) {
     return {
       top: e[0],
@@ -183,10 +183,10 @@ export default class Html2Canvas {
       element: dom,
       parent: {
         bounding: {
-          topInner: Size.zero(),
-          leftInner: Size.zero(),
-          widthInner: new Size(`${canvas.width}px`),
-          height: Size.zero(),
+          topInner: UnitSize.zero(),
+          leftInner: UnitSize.zero(),
+          widthInner: new UnitSize(`${canvas.width}px`),
+          height: UnitSize.zero(),
         },
       },
       renderer: this,

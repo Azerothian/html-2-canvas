@@ -205,3 +205,11 @@ p {
 
 - removed inheritancy of number with unit size class as it breaks object compare.
 - stopped em calculation from multipling on it self.
+
+### 0.0.6
+
+- uglifyjs has a problem with Size class name or is it the babel compile?
+
+### 0.0.7
+
+- yes it does.

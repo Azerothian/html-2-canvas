@@ -1,6 +1,6 @@
 const sizeCheck = /([0-9|\.]*)([a-zA-Z|%]*)/;
 
-export default class Size {
+export default class UnitSize {
   static test(e) {
     if (!isNaN(parseFloat(e))) {
       return true;
@@ -9,26 +9,26 @@ export default class Size {
     return m.length === 3;
   }
   static zero() {
-    return new Size(0);
+    return new UnitSize(0);
   }
   static add(i, ...a) {
-    return new Size(a.reduce((v, s) => {
-      // console.log("Addd", {v, s, test: typeof s, test2: s instanceof Size });
+    return new UnitSize(a.reduce((v, s) => {
+      // console.log("Addd", {v, s, test: typeof s, test2: s instanceof UnitSize });
       return (v + s);
     }, i));
   }
   static subtract(i, ...a) {
-    return new Size(a.reduce((v, s) => {
+    return new UnitSize(a.reduce((v, s) => {
       return (v - s);
     }, i));
   }
   static multiply(i, ...a) {
-    return new Size(a.reduce((v, s) => {
+    return new UnitSize(a.reduce((v, s) => {
       return (v * s);
     }, i));
   }
   static divide(i, ...a) {
-    return new Size(a.reduce((v, s) => {
+    return new UnitSize(a.reduce((v, s) => {
       return (v / s);
     }, i));
   }
@@ -48,7 +48,7 @@ export default class Size {
       this.measure = "%";
       return;
     }
-    if (!Size.test(s)) {
+    if (!UnitSize.test(s)) {
       this.val = parseFloat(s);
       if (isNaN(this.val)) {
         throw new Error(`This is not a size value '${s}'`, s);
@@ -65,16 +65,16 @@ export default class Size {
     // this.size = 
   }
   add(...a) {
-    return Size.add.apply(undefined, [this].concat(a));
+    return UnitSize.add.apply(undefined, [this].concat(a));
   }
   subtract(...a) {
-    return Size.subtract.apply(undefined, [this].concat(a));
+    return UnitSize.subtract.apply(undefined, [this].concat(a));
   }
   multiply(...a) {
-    return Size.multiply.apply(undefined, [this].concat(a));
+    return UnitSize.multiply.apply(undefined, [this].concat(a));
   }
   divide(...a) {
-    return Size.divide.apply(undefined, [this].concat(a));
+    return UnitSize.divide.apply(undefined, [this].concat(a));
   }
   equals(sizeElement) {
     return this.valueOf() === sizeElement.valueOf();
@@ -94,8 +94,8 @@ export default class Size {
           }
           current = current.parent;
         } while (true);
-        let baseSize = target.valueOf(element.parent);
-        return this.val * baseSize;
+        let baseUnitSize = target.valueOf(element.parent);
+        return this.val * baseUnitSize;
       case "vw":
         return (this.val / 100) * element.renderer.width;
       case "vh":
